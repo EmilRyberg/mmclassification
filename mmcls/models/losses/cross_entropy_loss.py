@@ -1,4 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -107,7 +108,11 @@ def binary_cross_entropy(pred,
     """
     # Ensure that the size of class_weight is consistent with pred and label to
     # avoid automatic boracast,
-    assert pred.dim() == label.dim()
+    if pred.size()[1] == 1: # only 1 class (excluding background)
+        pred = pred.squeeze()
+        label = label.float()
+    else:
+        assert pred.dim() == label.dim()
 
     if class_weight is not None:
         N = pred.size()[0]

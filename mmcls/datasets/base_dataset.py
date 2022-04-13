@@ -11,6 +11,7 @@ from torch.utils.data import Dataset
 
 from mmcls.core.evaluation import precision_recall_f1, support
 from mmcls.models.losses import accuracy
+from mmcls.models.losses import binary_accuracy
 from .pipelines import Compose
 
 
@@ -152,7 +153,7 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
         else:
             metrics = metric
         allowed_metrics = [
-            'accuracy', 'precision', 'recall', 'f1_score', 'support'
+            'accuracy', 'precision', 'recall', 'f1_score', 'support', 'binary_accuracy'
         ]
         eval_results = {}
         results = np.vstack(results)
@@ -183,6 +184,22 @@ class BaseDataset(Dataset, metaclass=ABCMeta):
                 }
             else:
                 eval_results_ = {'accuracy': acc}
+            if isinstance(thrs, tuple):
+                for key, values in eval_results_.items():
+                    eval_results.update({
+                        f'{key}_thr_{thr:.2f}': value.item()
+                        for thr, value in zip(thrs, values)
+                    })
+            else:
+                eval_results.update(
+                    {k: v.item()
+                     for k, v in eval_results_.items()})
+        elif 'binary_accuracy' in metrics:
+            if thrs is not None:
+                acc = binary_accuracy(results, gt_labels, thrs=thrs)
+            else:
+                acc = binary_accuracy(results, gt_labels)
+            eval_results_ = {'accuracy': acc}
             if isinstance(thrs, tuple):
                 for key, values in eval_results_.items():
                     eval_results.update({
