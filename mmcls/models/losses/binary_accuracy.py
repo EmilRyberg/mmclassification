@@ -51,7 +51,7 @@ def accuracy_torch(pred, target, thrs=0.5):
     pred_label = pred_label.t()
     correct = pred_label.eq(target.view(1, -1).expand_as(pred_label))
     # Only prediction values larger than thr are counted as correct
-    _correct = correct & (pred_score.t() > thrs)
+    _correct = correct
     correct_k = _correct.reshape(-1).float().sum(0, keepdim=True)
     res_thr = correct_k.mul_(100. / num)
     res.append(res_thr)
