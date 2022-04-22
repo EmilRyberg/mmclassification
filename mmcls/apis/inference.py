@@ -51,7 +51,7 @@ def init_model(config, checkpoint=None, device='cuda:0', options=None):
     return model
 
 
-def inference_model(model, img):
+def inference_model(model, img, is_binary=False):
     """Inference image(s) with the classifier.
 
     Args:
@@ -83,9 +83,14 @@ def inference_model(model, img):
     # forward the model
     with torch.no_grad():
         scores = model(return_loss=False, **data)
-        pred_score = np.max(scores, axis=1)[0]
-        pred_label = np.argmax(scores, axis=1)[0]
-        result = {'pred_label': pred_label, 'pred_score': float(pred_score)}
+        if not is_binary:
+            pred_score = np.max(scores, axis=1)[0]
+            pred_label = np.argmax(scores, axis=1)[0]
+            result = {'pred_label': pred_label, 'pred_score': float(pred_score)}
+        else:
+            pred_score = scores[0]
+            pred_label = 1 if scores[0] > 0.5 else 0
+            result = {'pred_label': pred_label, 'pred_score': float(pred_score)}
     result['pred_class'] = model.CLASSES[result['pred_label']]
     return result
 

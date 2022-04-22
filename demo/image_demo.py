@@ -11,12 +11,14 @@ def main():
     parser.add_argument('checkpoint', help='Checkpoint file')
     parser.add_argument(
         '--device', default='cuda:0', help='Device used for inference')
+    parser.add_argument(
+        '--is-binary', default=False, help='If it is binary classification', type=bool)
     args = parser.parse_args()
 
     # build the model from a config file and a checkpoint file
     model = init_model(args.config, args.checkpoint, device=args.device)
     # test a single image
-    result = inference_model(model, args.img)
+    result = inference_model(model, args.img, args.is_binary)
     # show the results
     show_result_pyplot(model, args.img, result)
 
